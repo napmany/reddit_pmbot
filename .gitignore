@@ -1,0 +1,8 @@
+*.pyc
+*.json
+*.csv
+*.log
+tests/*
+.directory
+.idea/
+config_bot.py
