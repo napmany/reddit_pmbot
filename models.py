@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from peewee import *
 
 db = SqliteDatabase('reddit_pmbot.db')

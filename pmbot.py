@@ -68,13 +68,12 @@ def save_message(username, group_id, intersection):
 
 def main():
     if not os.path.isfile("config_bot.py"):
-        print "You must create a config file config_bot.py with your username and password."
+        print "You must create a config file config_bot.py"
         exit(1)
 
     keywords = [x.lower() for x in KEYWORDS]
 
     group = get_or_create_group(SUBREDDIT, keywords)
-    print(group.id)
 
     user_agent = ("PM machine 0.1")
     r = praw.Reddit(user_agent=user_agent)
@@ -84,20 +83,16 @@ def main():
 
     lastmsg_datetime = None
 
-    for submission in subreddit.get_new(limit=10):
+    for submission in subreddit.get_new(limit=None):
         if lastmsg_datetime is None:
             lastmsg_datetime = submission.created_utc
         if group.lastmsg_datetime and group.lastmsg_datetime >= submission.created_utc:
-            print('Eto break')
             break
         intersection = get_intersection(keywords, get_words(submission.title))
         if intersection and not is_message_send(intersection, submission.author.name, group.id):
             print("Bot sending pm to : %s" % submission.author.name)
-            if submission.author.name == 'napmany':
-                r.send_message(submission.author, TITLE, MESSAGE)
-            else:
-                print("Bot sending pm to NOT ME!!!! : %s" % submission.author.name)
-            save_message(submission.author, group.id, intersection)
+            r.send_message(submission.author, TITLE, MESSAGE)
+            save_message(submission.author, group.id, keywords)
             time.sleep(5)
 
     group.lastmsg_datetime = lastmsg_datetime
