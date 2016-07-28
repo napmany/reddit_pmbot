@@ -44,9 +44,10 @@ def get_intersection(list1, list2):
     return [x for x in list1 if x in list2]
 
 
-def is_message_send(intersection, username, group_id):
+def is_message_send(intersection, username, group_id, title):
     if Message.select().where(Message.username == username).count():
-        if Message.select().where((Message.username == username) & (Message.group == group_id)).count():
+        if Message.select().where((Message.username == username) & ((Message.group == group_id) |
+                                                                        (Message.title == title))).count():
             return True
         if Message.select().join(KeywordMessage).join(Keyword).where((Message.username == username) &
                                                                              (Keyword.name << intersection)).count():
@@ -54,8 +55,8 @@ def is_message_send(intersection, username, group_id):
     return False
 
 
-def save_message(username, group_id, intersection):
-    message = Message(username=username, group_id=group_id)
+def save_message(username, group_id, intersection, title):
+    message = Message(username=username, group_id=group_id, title=title)
     message.save()
     for name in intersection:
         keyword = Keyword.get(name=name)
@@ -89,10 +90,10 @@ def main():
         if group.lastmsg_datetime and group.lastmsg_datetime >= submission.created_utc:
             break
         intersection = get_intersection(keywords, get_words(submission.title))
-        if intersection and not is_message_send(intersection, submission.author.name, group.id):
+        if intersection and not is_message_send(intersection, submission.author.name, group.id, TITLE):
             print("Bot sending pm to : %s" % submission.author.name)
             r.send_message(submission.author, TITLE, MESSAGE)
-            save_message(submission.author, group.id, keywords)
+            save_message(submission.author, group.id, keywords, TITLE)
             time.sleep(5)
 
     group.lastmsg_datetime = lastmsg_datetime

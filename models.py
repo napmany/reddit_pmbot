@@ -24,6 +24,7 @@ class Keyword(Model):
 
 class Message(Model):
     username = CharField()
+    title = CharField()
     group = ForeignKeyField(Group, related_name='messages')
 
     class Meta:
